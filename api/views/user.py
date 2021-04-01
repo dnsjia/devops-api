@@ -17,17 +17,12 @@ from decouple import config
 from requests.auth import HTTPBasicAuth
 from django.contrib.auth import authenticate, login
 from django.db.models import Q
-from django.http import JsonResponse, HttpResponse
-from rest_framework import status, authentication
-from rest_framework.permissions import IsAuthenticated
+from django.http import JsonResponse
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.versioning import QueryParameterVersioning, URLPathVersioning
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from rest_framework_jwt.settings import api_settings
 import traceback
-from api.models import UserInfo, UserToken, AccountType, InnerAccount
-from api.utils.dingtalk_notice import DingTalkSendMsg
+from api.models import UserInfo, AccountType, InnerAccount
 from api.utils.permissions import MyPermission
 from rbac.models import Role
 from api.utils.jwt_token import create_token
@@ -51,7 +46,7 @@ class UserLoginView(APIView):
 
     def post(self, request, *args, **kwargs):
         """
-        {'params': {'username': 'ops@pigs.com', 'password': '123456', 'remember': True}}
+        {'params': {'username': 'gujiwork@pigs.com', 'password': '123456', 'remember': True}}
         用户登录校验
         :param request:
         :param args:
@@ -59,7 +54,7 @@ class UserLoginView(APIView):
         :return:
         """
         try:
-
+            #print(request.body)
             data = json.loads(request.body)['params']
             user_name = data['username']
             user_pwd = data['password']
@@ -94,8 +89,8 @@ class UserLoginView(APIView):
                 "data": "null"
             }, status=status.HTTP_200_OK)
 
-        except BaseException:
-            logger.error("用户登录失败, 失败原因: %s" % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error("用户登录失败, 失败原因: %s" % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": 99999,
                 "msg": "登陆失败, 系统遇到未知错误!",
@@ -129,7 +124,7 @@ class UserInfoView(APIView):
             }, json_dumps_params={'ensure_ascii': False})
 
         except BaseException as e:
-            logger.error("获取用户信息失败: %s" % str(traceback.format_exc()))
+            logger.error("获取用户信息失败: %s" % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": 1010,
                 "msg": "获取用户信息失败, 系统遇到未知错误!",
@@ -143,8 +138,8 @@ class UserInfoView(APIView):
             user_id = request.query_params['user_id']
             UserInfo.objects.filter(user_id=user_id).delete()
             return JsonResponse(data={'errcode': 0, 'msg': '删除用户成功'})
-        except BaseException:
-            logger.error('删除用户异常：%s' % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error('删除用户异常：%s' % str(traceback.format_exc()), e)
             return JsonResponse(data={'errcode': 500, 'msg': '删除用户异常！'})
 
     def put(self, request, *args, **kwargs):
@@ -155,8 +150,8 @@ class UserInfoView(APIView):
             print(user_id)
             UserInfo.objects.filter(user_id=user_id['user_id']).update(is_active=user_id['is_active'])
             return JsonResponse(data={'errcode': 0, 'msg': '更新用户成功'})
-        except BaseException:
-            logger.error('更新用户异常：%s' % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error('更新用户异常：%s' % str(traceback.format_exc()), e)
             return JsonResponse(data={'errcode': 500, 'msg': '更新用户异常！'})
 
 
@@ -173,8 +168,8 @@ class UserRoleView(APIView):
             user_obj.roles.add(*role_id)
             user_obj.save()
             return JsonResponse(data={'errcode': 0, 'msg': '用户角色更新成功'})
-        except BaseException:
-            logger.error('用户角色更新异常：%s' % str(traceback.format_exc()))
+        except BaseException as e :
+            logger.error('用户角色更新异常：%s' % str(traceback.format_exc()), e)
             return JsonResponse(data={'errcode': 500, 'msg': '用户角色更新异常！'})
 
 
@@ -208,7 +203,7 @@ class AccountInfoView(APIView):
                 return Response(page_ser.data)
 
         except BaseException as e:
-            logger.error("获取用户信息失败: %s" % str(traceback.format_exc()))
+            logger.error("获取用户信息失败: %s" % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": 1010,
                 "msg": "获取用户信息失败, 系统遇到未知错误!",
@@ -293,7 +288,7 @@ class SendCodeView(APIView):
             return Response(data={'errcode': 0, 'msg': '验证码已发送,请稍后查看邮箱'})
 
         except BaseException as e:
-            logger.error("获取验证码出错, 原因: %s" % str(traceback.format_exc()))
+            logger.error("获取验证码出错, 原因: %s" % str(traceback.format_exc()), e)
             print(traceback.format_exc())
             return Response(data={'errcode': 1008, 'msg': '获取验证码异常'})
 
@@ -325,7 +320,7 @@ class CheckCodeView(APIView):
             return Response(data={'errcode': 0, 'msg': '验证码校验通过'})
 
         except BaseException as e:
-            logger.error("校验验证码出现异常, 原因: %s" % str(traceback.format_exc()))
+            logger.error("校验验证码出现异常, 原因: %s" % str(traceback.format_exc()), e)
             print(traceback.format_exc())
             return Response(data={'errcode': 1010, 'msg': '验证码已过期或不正确'})
 
@@ -360,7 +355,7 @@ class ResetPwdView(APIView):
             return Response(data={'errcode': 1011, 'msg': '验证码已过期或不正确'})
 
         except BaseException as e:
-            logger.error('修改密码失败, 失败原因:%s' % str(traceback.format_exc()))
+            logger.error('修改密码失败, 失败原因:%s' % str(traceback.format_exc()), e)
             return Response(data={'errcode': 1012, 'msg': '密码修改失败,请重试！'})
 
 
@@ -390,8 +385,8 @@ class ChangePwdView(APIView):
                 return Response(data={'errcode': 0, 'msg': '密码修改成功'})
             return Response(data={'errcode': 1012, 'msg': '登录过期,请重新登录后再试！'})
 
-        except BaseException:
-            logger.error('密码修改失败: %s' % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error('密码修改失败: %s' % str(traceback.format_exc()), e)
             print(traceback.format_exc())
             return Response(data={'errcode': 1012, 'msg': '密码修改失败！'})
 
@@ -478,7 +473,7 @@ class UserAccountView(APIView):
             return JsonResponse(data=data)
 
         except BaseException as e:
-            logger.error('审核用户账号时出现异常: %s' % str(traceback.format_exc()))
+            logger.error('审核用户账号时出现异常: %s' % str(traceback.format_exc()), e)
             data = {
                 "errcode": 400,
                 "msg": "提交异常,请联系管理员处理！",
@@ -515,8 +510,8 @@ class UserAccountRecordView(APIView):
                 page_account_record = paginator.get_paginated_response(serializer_account_info.data)
                 return Response(page_account_record.data)
 
-        except BaseException:
-            logger.error('系统出现异常: %s' % str(traceback.format_exc()))
+        except BaseException as e :
+            logger.error('系统出现异常: %s' % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": "1006",
                 "msg": "系统异常, 请刷新重试!",
@@ -550,7 +545,7 @@ class UserAccountRecordView(APIView):
                     logger.info('异步任务返回ID: %s, 状态: %s' % (str(result.id), str(result.state)))
 
                 except BaseException as e:
-                    pass
+                    logger.error(e)
 
                 return JsonResponse(data={
                     "msg": "已拒绝该用户的申请！",
@@ -675,7 +670,7 @@ class UserAccountRecordView(APIView):
 
                         queryset.status = 0
                         queryset.save()
-                        url = 'http://jira.srv.pigs.com/'
+                        url = 'http://jira.pigs.com/'
                         logger.info('Jira用户创建成功, 发送异步通知')
                         result = send_deploy_email.delay(email, name['name'], title, msg, msg_en, url, subject=title)
                         logger.info('异步任务返回ID: %s, 状态: %s' % (str(result.id), str(result.state)))
@@ -697,7 +692,7 @@ class UserAccountRecordView(APIView):
                     if '注册成功' in bro.find_element_by_xpath('//*[@id="main"]/div[1]/p').text:
                         queryset.status = 0
                         queryset.save()
-                        url = 'http://pan.srv.pigs.com/accounts/login/?next=/'
+                        url = 'http://pan.pigs.com/accounts/login/?next=/'
                         logger.info('网盘用户注册成功，请等待管理员激活！')
                         result = send_deploy_email.delay(email, name['name'], title, msg, msg_en, url, subject=title)
                         logger.info('异步任务返回ID: %s, 状态: %s' % (str(result.id), str(result.state)))
@@ -760,7 +755,7 @@ class UserAccountRecordView(APIView):
                     if kibana_result.status_code == 200:
                         queryset.status = 0
                         queryset.save()
-                        url = 'http://logs.prod.pigs.com/login'
+                        url = 'http://kibana.cmdb.pigs.com/login'
                         logger.info('生产环境日志平台用户创建成功, 发送异步通知')
                         result = send_deploy_email.delay(email, name['name'], title, msg, msg_en, url, subject=title)
                         logger.info('异步任务返回ID: %s, 状态: %s' % (str(result.id), str(result.state)))
@@ -825,10 +820,10 @@ class UserAccountRecordView(APIView):
                     logger.info("用户名：%s, 密码：%s, 邮箱：%s" % (username['username'], password, email))
                     logger.info('RAM/RDS用户创建成功！, 发送异步通知')
                     msg = '您申请的帐号已经开通， 用户名：%s, 请妥善保管（%s）密码！' % (
-                        str(username['username'] + '@[替换成阿里云账号ID].onaliyun.com'),
+                        str(username['username'] + '@pigs.onaliyun.com'),
                         str(password))
                     msg_en = 'Your account has been opened. User name: %s Please keep your password! (%s)' % (
-                        str(username['username'] + '@[替换成阿里云账号ID].onaliyun.com'),
+                        str(username['username'] + '@pigs.onaliyun.com'),
                         str(password)
                     )
 

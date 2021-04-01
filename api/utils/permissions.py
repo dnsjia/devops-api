@@ -25,7 +25,6 @@ class MyPermission(BasePermission):
 
     def has_permission(self, request, view):
         current_url = request.path_info
-
         method = request.method
         p = re.compile(r'([a-zA-Z]|[0-9]|[.])|(/.*)')
         url = p.findall(current_url)[0][1]
@@ -41,7 +40,6 @@ class MyPermission(BasePermission):
             if token is None:
                 token = request.META.get('HTTP_AUTHORIZATION', '').split()[1]
             result = parse_payload(token)
-
             paths = []
             permissions = result['data'].get('permissions', {})
             for key in permissions.keys():

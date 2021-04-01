@@ -48,7 +48,6 @@ class RoleView(ModelViewSet):
         return Response({'data':{'errcode': 0, 'msg': '删除成功'}})
 
     def get_serializer_class(self):
-        print(self.action,'--------555555555555')
         if self.action == 'list' or self.action == 'retrieve':
             return roles_serializers.RoleListSerializer
 

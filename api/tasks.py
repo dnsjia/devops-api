@@ -19,7 +19,7 @@ import traceback
 import requests
 from api.utils.dingtalk_notice import DingTalkSendMsg
 from django.core.mail import EmailMultiAlternatives
-from api.utils.check_jenkins import JenkinsStauts
+from api.utils.check_jenkins import JenkinsStatus
 from django_redis import get_redis_connection
 from jenkinsapi.jenkins import Jenkins
 from decouple import config
@@ -52,7 +52,7 @@ def dashboard_deploy_chart_count():
             DeployStatusChart.objects.update_or_create(defaults={'count': success_count}, days=str_today,deploy_status='部署成功')
 
     except BaseException as e:
-        logger.error('部署成功状态统计结转失败, 异常原因: %s' % str(traceback.format_exc()))
+        logger.error('部署成功状态统计结转失败, 异常原因: %s' % str(traceback.format_exc()), e)
 
     try:
         failed_count = DeployTask.objects.filter(
@@ -63,10 +63,10 @@ def dashboard_deploy_chart_count():
             DeployStatusChart.objects.update_or_create(defaults={'count': failed_count}, days=str_today,deploy_status='部署失败')
 
     except BaseException as e:
-        logger.error('部署成功状态统计结转失败, 异常原因: %s' % str(traceback.format_exc()))
+        logger.error('部署成功状态统计结转失败, 异常原因: %s' % str(traceback.format_exc()), e)
 
 alarm_user = '1508870xxxx,1508870xxxx'
-notice_url = 'https://oapi.dingtalk.com/robot/send?access_token={填写ding token}'
+notice_url = 'https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxxxxxxxx'
 cache_redis = get_redis_connection('default')
 
 
@@ -491,7 +491,7 @@ def send_deploy_email(email, name, title, msg, msg_en, url, subject='小飞猪�
                     <table align="left" width="100%" border="0" cellpadding="0" cellspacing="0" class="mcnImageContentContainer" style="min-width:100%;">
                         <tbody><tr>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
-                                        <img align="center" alt="" src="{填写你的Logo url}/images/login/loginlogo.png" width="196" style="max-width:196px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.pigs.com/images/login/loginlogo.png" width="196" style="max-width:196px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                             </td>
                         </tr>
                     </tbody></table>
@@ -622,7 +622,7 @@ def send_deploy_email(email, name, title, msg, msg_en, url, subject='小飞猪�
 
                 <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; font-family: Arvo, Courier, Georgia, serif; font-style: normal; font-weight: normal;">
 
-                    <em>Copyright © 飞巴运维平台 All rights reserved.</em>
+                    <em>Copyright © 小飞猪运维平台 All rights reserved.</em>
                 </td>
             </tr>
         </tbody></table>
@@ -657,7 +657,7 @@ def send_deploy_email(email, name, title, msg, msg_en, url, subject='小飞猪�
 </html>
 '''
 
-    message = EmailMultiAlternatives(subject, text_content, '运维平台', [email])
+    message = EmailMultiAlternatives(subject, text_content, '运维平台<system@pigs.com>', [email])
     message.attach_alternative(html_content.format(css=css, title=title, name=name, msg=msg, msg_en=msg_en, url=url),
                                "text/html")
     message.send()
@@ -707,7 +707,7 @@ def deploy_send_develop_dingtalk_group(data="异步钉钉通知", at_develop_use
     :param data:
     :return:
     """
-    develop_group_notice_url = 'https://oapi.dingtalk.com/robot/send?access_token={填写ding token}'
+    develop_group_notice_url = 'https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxxxxxxxxx'
     headers = {
         'Content-Type': 'application/json;charset=utf-8',
     }
@@ -760,7 +760,7 @@ def check_status(project_name, build_id, task_id):
     :return:
     """
 
-    deploy_status = JenkinsStauts.jenkins_task_status(project_name=project_name, build_id=int(build_id),task_id=task_id)
+    deploy_status = JenkinsStatus.jenkins_task_status(project_name=project_name, build_id=int(build_id),task_id=task_id)
     return deploy_status
 
 
@@ -798,7 +798,7 @@ def check_rollback_status(project_name, build_id):
     :param build_id:
     :return:
     """
-    rollback_status = JenkinsStauts.jenkins_rollback_status(project_name=project_name, build_id=int(build_id))
+    rollback_status = JenkinsStatus.jenkins_rollback_status(project_name=project_name, build_id=int(build_id))
 
 
 @shared_task
@@ -819,7 +819,7 @@ def sync_code_job_cluster(project_name, task_id):
             "开始同步集群代码：params={'sync_project': %s, 'code': 'class', 'slb': True, 'is_restart_tomcat': True}" % project_name)
         server_2.build_job('trip-sbox-sync', params={'sync_project': project_name, 'code': 'class', 'slb': True,
                                                      'is_restart_tomcat': True})
-        build_id = JenkinsStauts.jenkins_task_id('trip-sbox-sync')
+        build_id = JenkinsStatus.jenkins_task_id('trip-sbox-sync')
         Sync_Model = SyncJobHistory()
         Sync_Model.sync_id = build_id
         Sync_Model.sync_project = project_name
@@ -829,10 +829,10 @@ def sync_code_job_cluster(project_name, task_id):
         Sync_Model.off_slb = True
         Sync_Model.is_restart_tomcat = True
         Sync_Model.save()
-        sync_cluster_result = JenkinsStauts.jenkins_sync_status(project_name='trip-sbox-sync', build_id=build_id,
+        sync_cluster_result = JenkinsStatus.jenkins_sync_status(project_name='trip-sbox-sync', build_id=build_id,
                                                                 task_id=task_id)
     else:
-        logger.info('任务：%s, 属于单机项目无集群机器, 跳过同步。' % (project_name))
+        logger.info('任务：%s, 属于单机项目无集群机器, 跳过同步。' % project_name)
 
 
 @shared_task
@@ -855,11 +855,11 @@ def rollback_sync_code_job_cluster(project_name):
             'code': 'class',
             'slb': True,
             'is_restart_tomcat': True})
-        build_id = JenkinsStauts.jenkins_task_id('trip-sbox-sync')
-        sync_cluster_result = JenkinsStauts.jenkins_rollback_status(project_name='trip-sbox-sync', build_id=build_id)
+        build_id = JenkinsStatus.jenkins_task_id('trip-sbox-sync')
+        sync_cluster_result = JenkinsStatus.jenkins_rollback_status(project_name='trip-sbox-sync', build_id=build_id)
 
     else:
-        logger.info('回滚任务：%s, 属于单机项目无集群机器, 跳过同步。' % (project_name))
+        logger.info('回滚任务：%s, 属于单机项目无集群机器, 跳过同步。' % project_name)
 
 
 @shared_task

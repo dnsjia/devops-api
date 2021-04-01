@@ -26,7 +26,7 @@ SECRET_KEY = '4_suimaa5*djaqdbwhk1mr!r%nprodm2jdm=r)szs+hb-m=zp='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.234']
+ALLOWED_HOSTS = ['devops.cmdb.srv.pigs.com', '192.168.1.234', '192.168.1.36', '192.168.1.9', '192.168.1.79']
 
 # Application definition
 
@@ -99,8 +99,8 @@ DATABASES = {
         'NAME': 'devops',
         'HOST': '192.168.1.234',
         'PORT': 3306,
-        'USER': '',
-        'PASSWORD': '',
+        'USER': 'pigs',
+        'PASSWORD': 'xxxxxxxxxxxxxxx',
     }
 }
 
@@ -114,7 +114,7 @@ CACHES = {
                 "max_connections": 300,
                 "decode_responses": False,
             },
-            "PASSWORD": ""
+            "PASSWORD": "xxxxxxxxxxxxxxxxxxxxxxx"
         }
     }
 }
@@ -346,13 +346,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_SSL = True
 EMAIL_HOST = 'smtp.exmail.qq.com'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_FROM = '运维平台'
+EMAIL_HOST_USER = 'system@pigs.com'
+EMAIL_HOST_PASSWORD = 'xxxxxxxxxxxxxxxx'
+EMAIL_FROM = '运维平台<system@pigs.com>'
 CONFIRM_DAYS = 1
 
 # Celery application definition
-CELERY_BROKER_URL = 'redis://:password@192.168.1.234:6379/15'
+CELERY_BROKER_URL = 'redis://:xxxxxxxxxxxxxxxxxxxx@192.168.1.234:6379/15'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERYD_CONCURRENCY = 2 # worker的并发数
 CELERYD_MAX_TASKS_PER_CHILD = 20  #由于长期运行会导致内存不释放，需要设置池子回收
@@ -377,7 +377,7 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
 sentry_sdk.init(
-    dsn="http://{   token  }@192.168.1.253:9000/8",
+    dsn="http://xxxxxxxxxxxxxxxxxxxx@192.168.1.253:9000/8",
     integrations=[DjangoIntegration()],
 
     # If you wish to associate users to errors (assuming you are using

@@ -2,7 +2,6 @@ from django.conf.urls import url
 from api.views.approval import ApprovalUserView, ApprovalListView, ApprovalAllView
 from api.views.deploy import DeployView, DeployDetailView, DeployAuditLogsView, ApprovalDeployStatus, DeployCode
 from api.views.deploy_chart import DashboardChart, DeployChart
-from api.views.flight_order_dump import FlightOrderDumpView
 from api.views.rollback import DeployRollBackView, CreateDeployBackupView
 from api.views.upload import UploadView, CaseUploadView
 from api.views.user import UserInfoView, CheckEmailExistView, \
@@ -12,16 +11,14 @@ from api.views.nginx import QueryNginxView, AddHostNginxView
 from api.views.project import QueryProjectView
 from api.views.dingtalk import DingConf, DingCallBack
 from api.views.ticket import TicketRecordView, TicketDetailView, TicketTypelView, TicketView
-from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
+from rest_framework_jwt.views import refresh_jwt_token
 from api.views.gray import GrayServerView, GrayDomainView
-from api.views.websocket_bak import QueryDeployLogs
 from api.views.database import DatabaseView
 from api.views.es_manage import ElasticSearchView
 app_name = 'api'
 
 
 urlpatterns = [
-    url(r'websocket$', QueryDeployLogs.as_view(), name='websocket'),
     url(r'^(?P<version>[v1|v2]+)/user/login$', UserLoginView.as_view(), name='login'),
     url(r'^(?P<version>[v1|v2]+)/user/getUserInfo$', UserInfoView.as_view(), name='user_info'),
     # 更新用户角色
@@ -74,7 +71,6 @@ urlpatterns = [
     url(r'^(?P<version>[v1|v2]+)/database$', DatabaseView.as_view(), name='database'),
     # ElasticSearch
     url(r'^(?P<version>[v1|v2]+)/es/search$', ElasticSearchView.as_view(), name='search'),
-    url(r'^(?P<version>[v1|v2]+)/flightOrder/download$', FlightOrderDumpView.as_view(), name='flight_order_dump'),
 
 
 

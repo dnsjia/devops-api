@@ -10,17 +10,18 @@
 """
 from rest_framework.views import APIView
 from django.http import FileResponse, HttpResponse
-from pathlib import Path
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
 class DownLoadFile(APIView):
+    authentication_classes = []
+    permission_classes = []
+
     def get(self, request, *args, **kwargs):
         file_path = request.path.split('download')[1]
         ext = os.path.basename(file_path).split('.')[-1].lower()
 
-        # 将第一个反斜杠替换为空 /files/es/chenyihao_20201123131458.json  files/es/chenyihao_20201123131458.json
         es_json_path = os.path.join(BASE_DIR, file_path.replace('/', '',1))
 
         # 允许下载的文件后缀名

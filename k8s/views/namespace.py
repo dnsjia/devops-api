@@ -38,7 +38,7 @@ class NamespaceView(APIView):
                 tmp_context.append(tmp_dict)
             context['data'] = tmp_context
         except Exception as e:
-            logger.error('获取namespace失败：%s' % str(traceback.format_exc()))
+            logger.error('获取namespace失败：%s' % str(traceback.format_exc()), e)
             context['msg'] = '获取失败'
             context['errcode'] = 1000
 
@@ -53,7 +53,7 @@ class NamespaceView(APIView):
             if ret.status.phase == 'Active':
                 return Response(context)
         except Exception as e:
-            logger.error('创建namespace失败：%s' % str(traceback.format_exc()))
+            logger.error('创建namespace失败：%s' % str(traceback.format_exc()), e)
             context['errcode'] = 1000
             context['msg'] = '创建失败'
         return Response(context)
@@ -65,7 +65,7 @@ class NamespaceView(APIView):
         try:
             v1.delete_namespace(name=namespace)
         except Exception as e:
-            logger.error('删除namespace失败：%s' % str(traceback.format_exc()))
+            logger.error('删除namespace失败：%s' % str(traceback.format_exc()), e)
             context['errcode'] = 1000
             context['msg'] = '删除失败'
         return Response(context)

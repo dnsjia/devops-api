@@ -33,8 +33,9 @@ class DingTalkSendMsg:
                 access_token = res.get('access_token')
                 return access_token
             else:
-                logger.error("获取企业凭证失败，%s" %(res))
+                logger.error("获取企业凭证失败，%s" % res)
         except BaseException as e:
+            logger.error(e)
             logger.error('获取企业凭证失败: %s' % str(traceback.format_exc()))
 
     @classmethod
@@ -68,4 +69,5 @@ class DingTalkSendMsg:
             logger.info('发送钉钉工作通知消息完成，请求body:{%s}' %(str(data)))
 
         except BaseException as e:
+            logger.error(e)
             logger.error('发送钉钉工作通知消息异常: %s' % str(traceback.format_exc()))

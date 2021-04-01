@@ -154,18 +154,12 @@ class DingCallBack(APIView):
                     else:
                         # 首次登录 建立账号保存到数据库
                         try:
-                            user_data = {}
-                            user_data['user_id'] = user_info['userid']
-                            user_data['username'] = email[0]
-                            user_data['last_name'] = user_info['name'][0]
-                            user_data['first_name'] = user_info['name'][1:]
-                            user_data['email'] = user_info['email']
-                            user_data['mobile'] = user_info['mobile']
-                            user_data['name'] = user_info['name']
-                            user_data['job_number'] = user_info['jobnumber']
-                            user_data['avatar'] = user_info['avatar']
-                            user_data['position'] = user_info['position']
-                            user_data['password'] = make_password('%s%s' % (email[0], user_info['mobile']))
+                            user_data = {'user_id': user_info['userid'], 'username': email[0],
+                                         'last_name': user_info['name'][0], 'first_name': user_info['name'][1:],
+                                         'email': user_info['email'], 'mobile': user_info['mobile'],
+                                         'name': user_info['name'], 'job_number': user_info['jobnumber'],
+                                         'avatar': user_info['avatar'], 'position': user_info['position'],
+                                         'password': make_password('%s%s' % (email[0], user_info['mobile']))}
                             # uninx 时间戳转换
                             time_local = time.localtime(user_info['hiredDate'] / 1000)
                             hire_date = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
@@ -193,9 +187,9 @@ class DingCallBack(APIView):
                                 "errcode": 40004, "msg": "您的钉钉工作信息不完整, 请联系公司人事进行处理！", "data": "null"
                             })
                 else:
-                    logger.warning("您当前的邮箱%s不属于@pigs.com, 请解绑后联系公司人事进行邮箱绑定！" %str(email))
+                    logger.warning("您当前的邮箱%s不属于@pigs.com, 请解绑后联系公司人事进行邮箱绑定！" % str(email,))
                     return JsonResponse(data={
-                        "errcode": 1009, "msg": "您当前的邮箱不属于@pigs, 请解绑后联系公司人事进行邮箱绑定！", "data": "null"
+                        "errcode": 1009, "msg": "您当前的邮箱不属于@flybycloud, 请解绑后联系公司人事进行邮箱绑定！", "data": "null"
                     })
             else:
                 logger.warning("您未绑定@pigs.com邮箱, 请联系公司人事进行邮箱绑定！")

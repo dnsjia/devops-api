@@ -10,20 +10,18 @@
 """
 import datetime
 import json
-import re
 import time
 import traceback
 import uuid
 from decouple import config
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.db import transaction
 from django_redis import get_redis_connection
 from jenkinsapi.jenkins import Jenkins
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from api.models import Project, DeployTask, DeployLogs, BuildHistory, UserInfo
 from api.utils.permissions import MyPermission
 from utils.check_jenkins import JenkinsStauts
@@ -113,7 +111,7 @@ class DeployView(APIView):
                         deploy_send_dingtalk_work_notice.delay(data)
 
                     except BaseException as e:
-                        logger.error('发送钉钉工作通知失败, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('发送钉钉工作通知失败, 异常原因: %s' % str(traceback.format_exc()), e)
 
                     return JsonResponse(data={"errcode": 0, "msg": "部署单创建成功！", "data": "null"})
 
@@ -164,7 +162,7 @@ class DeployView(APIView):
                         deploy_send_dingtalk_work_notice.delay(data)
 
                     except BaseException as e:
-                        logger.error('发送钉钉工作通知失败, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('发送钉钉工作通知失败, 异常原因: %s' % str(traceback.format_exc()), e)
 
                     return JsonResponse(data={"errcode": 0, "msg": "部署单创建成功！", "data": "null"})
                 else:
@@ -293,7 +291,7 @@ class ApprovalDeployStatus(APIView):
                         # todo 通知运维
                         send_dingtalk_group.delay("%s \n 上线单已审批通过, 请前往运维平台部署" % str(obj.first().title))
                     except BaseException as e:
-                        logger.error('发送钉钉群通知失败, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('发送钉钉群通知失败, 异常原因: %s' % str(traceback.format_exc()), e)
 
                     return JsonResponse(data={"errcode": 0, "msg": "操作成功", "data": "null"})
 
@@ -324,7 +322,7 @@ class ApprovalDeployStatus(APIView):
                             deploy_send_dingtalk_work_notice.delay(data)
 
                     except BaseException as e:
-                        logger.error('发送钉钉工作通知失败, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('发送钉钉工作通知失败, 异常原因: %s' % str(traceback.format_exc()), e)
 
                     return JsonResponse(data={"errcode": 0, "msg": "操作成功", "data": "null"})
 
@@ -396,7 +394,7 @@ class DeployCode(APIView):
                             task_id=data['taskId'],
                             project_id=query_deploy_task.project_id,
                             status=3,
-                            message='%s已开始部署应用 ' % (request.user.name))
+                            message='%s已开始部署应用 ' % request.user.name)
 
                         # 插入构建记录到历史表
                         build_history.build_id = build_id
@@ -449,7 +447,7 @@ class DeployCode(APIView):
                             task_id=data['taskId'],
                             project_id=query_deploy_task.project_id,
                             status=6,
-                            message='%s已开始部署应用 ' % (request.user.name))
+                            message='%s已开始部署应用 ' % request.user.name)
 
                         # 插入构建记录到历史表
                         build_history.build_id = build_id
@@ -503,7 +501,7 @@ class DeployCode(APIView):
                     })
 
             else:
-                logger.error('%s项目不存在, 请前往Jenkins配置' % (project_name))
+                logger.error('%s项目不存在, 请前往Jenkins配置' % project_name)
                 return JsonResponse(data={
                     "errcode": "4004",
                     "msg": "项目不存在,请联系运维添加项目！",

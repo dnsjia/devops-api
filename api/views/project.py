@@ -13,10 +13,8 @@ import json
 import traceback
 from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from api.models import Project
 from api.utils.authorization import MyAuthentication
 from api.utils.permissions import MyPermission
@@ -57,8 +55,8 @@ class QueryProjectView(APIView):
             project_page = paginator.get_paginated_response(serializer_project_info.data)
             return Response(project_page.data)
 
-        except BaseException:
-            logger.error('系统异常 %s' % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error('系统异常 %s' % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": "1006",
                 "msg": "系统异常, 请刷新重试!",

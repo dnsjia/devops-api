@@ -8,17 +8,13 @@
 @Time:2020/10/26 14:39
 """
 import json
-import time
 import traceback
-from api.utils.dingtalk_notice import DingTalkSendMsg
 from api.utils.permissions import MyPermission
 from utils.code import RandCode
 from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from api.models import Ticket, TicketType, UserInfo
 from api.utils.authorization import MyAuthentication
 from utils.rest_page import StandardResultsSetPagination
@@ -57,7 +53,7 @@ class TicketRecordView(APIView):
                 return Response(page_ticket_record.data)
 
         except BaseException as e:
-            logger.error("系统异常: %s" % str(traceback.format_exc()))
+            logger.error("系统异常: %s" % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": "1006",
                 "msg": "系统异常, 请刷新重试!",
@@ -91,8 +87,8 @@ class TicketDetailView(APIView):
                 page_ticket_record = paginator.get_paginated_response(serializer_ticket_info.data)
                 return Response(page_ticket_record.data)
 
-        except BaseException:
-            logger.error("查看工单详情出错: %s" % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error("查看工单详情出错: %s" % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": "1006",
                 "msg": "系统异常, 请刷新重试!",
@@ -120,8 +116,8 @@ class TicketTypelView(APIView):
             page_ticket = paginator.get_paginated_response(serializer_ticket_type_info.data)
             return Response(page_ticket.data)
 
-        except BaseException:
-            logger.error("请求工单类型出错: %s" % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error("请求工单类型出错: %s" % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": "1006",
                 "msg": "系统异常, 请刷新重试!",
@@ -168,6 +164,6 @@ class TicketView(APIView):
             send_dingtalk_group.delay("您有一条工单待处理！\n %s" % data.get('ticketTitle'))
             return JsonResponse(data={'errcode': 0, 'msg':'工单提交成功'})
 
-        except BaseException:
-            logger.error("工单提交失败, 原因: %s" % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error("工单提交失败, 原因: %s" % str(traceback.format_exc()), e)
             return JsonResponse(data={'errcode': 500, 'msg':'工单提交异常！'})

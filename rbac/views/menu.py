@@ -16,8 +16,8 @@ from rbac.serializers import menu_serializers
 from api.utils.pagination import MenuPagination
 from api.utils.tree import tree_filter
 from api.models import UserInfo
-import traceback
 import logging
+import traceback
 logger = logging.getLogger('default')
 
 
@@ -40,12 +40,10 @@ class MenuTreeView(APIView):
     """
 
     def get(self, request, *args, **kwargs):
-
         try:
             username = request.user.username
-        except Exception:
-            import traceback
-            logger.error('获取用户信息出错了:%s' % str(traceback.format_exc()))
+        except Exception as e :
+            logger.error('获取用户信息出错了:%s' % str(traceback.format_exc()), e)
             username = request.user['data']
         try:
 

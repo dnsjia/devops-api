@@ -8,7 +8,6 @@ from rest_framework import generics
 from api.utils.authorization import MyAuthentication
 from api.utils.permissions import MyPermission
 from auto_case.serializers import TestCaseSerializerAll, TestCaseTaskSerializerOther, TestCaseTaskLogsSerializerOther
-from auto_case.testcase import RunnerTestCase
 from api.tasks import run_case_test
 import logging
 from auto_case.models import TestCase, TestCaseDetail, TestTask

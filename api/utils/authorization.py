@@ -36,16 +36,13 @@ class MyAuthentication(BaseAuthentication):
         token = auth[1]
         result = parse_payload(token)
 
-
         if not result['status']:
             raise AuthenticationFailed(result)
 
         try:
             user = UserInfo.objects.get(username=result['data'].get('username'))
-
         except UserInfo.DoesNotExist:
             raise AuthenticationFailed('No such user')
-
         return user, token
 
 

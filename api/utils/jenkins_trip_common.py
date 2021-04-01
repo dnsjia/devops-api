@@ -17,7 +17,7 @@ import time
 import jenkins
 from django_redis import get_redis_connection
 from api.models import DeployTask, DeployLogs, BuildHistory
-from api.utils.check_jenkins import JenkinsStauts
+from api.utils.check_jenkins import JenkinsStatus
 from jenkinsapi.jenkins import Jenkins
 conn_redis = get_redis_connection('default')
 logger = logging.getLogger('default')
@@ -29,7 +29,8 @@ build_history = BuildHistory()
 class TripCommon(object):
 
     @classmethod
-    def jenkins_task_status(self, common_package: str, project_name: str, build_id: int, task_id: str, user_name: str, deploy_type: str) -> dict:
+    def jenkins_task_status(self, common_package: str, project_name: str, build_id: int, task_id: str,
+            user_name: str, deploy_type: str) -> dict:
         """
         任务构建状态
         :param common_package: 基础包名称
@@ -50,9 +51,8 @@ class TripCommon(object):
             else:
                 break
 
-        result = {}
-        result['url'] = "{0}{1}".format(job_url, next_id)
-        result['result'] = server.get_build_info(common_package, next_id)['result']
+        result = {'url': "{0}{1}".format(job_url, next_id),
+                  'result': server.get_build_info(common_package, next_id)['result']}
         queryset = DeployTask.objects.filter(task_id=task_id).first()
         if result.get("result") == 'SUCCESS':
             logger.info("任务：%strip-common基础包构建成功, 任务编号：%d" % (common_package, next_id))
@@ -63,7 +63,7 @@ class TripCommon(object):
                 'on_slb': True,
             }
             logger.info('%s开始部署应用: %s,  任务ID: %s, 发布类型: %s' % (user_name, project_name, task_id, deploy_type))
-            build_id = JenkinsStauts.jenkins_task_id(project_name)
+            build_id = JenkinsStatus.jenkins_task_id(project_name)
             JENKINS_OBJ.build_job(project_name, params=deploy_params)
             query_deploy_task = DeployTask.objects.filter(task_id=task_id).first()
             # 写入操作日志表
@@ -85,13 +85,12 @@ class TripCommon(object):
 
         else:
             # TODO 部署失败钉钉通知
-            #conn_redis.delete(project_name + "_lock")
             DeployLogs.objects.create(
                 task_id=task_id,
                 status=5,
                 message='基础包构建失败， 请联系运维查看原因！ ')
 
-            logger.info("任务: 基础包构建失败,任务编号：%d" % (next_id))
+            logger.info("任务: 基础包构建失败,任务编号：%d" % next_id)
             queryset.status = 5
             queryset.save()
 

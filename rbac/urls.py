@@ -23,7 +23,6 @@ urlpatterns = [
     path('paths/', permission.PermissionPath.as_view()),
     path('permissions/tree/', permission.PermissionTree.as_view()),
     path('permissions/all/', permission.PermissionAll.as_view()),
-
     path('', include(router.urls)),
 
 ]

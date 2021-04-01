@@ -23,7 +23,7 @@ class CaseDoneNotice(object):
         :param data: 接受数据
         :return:
         """
-        develop_group_notice_url = 'https://oapi.dingtalk.com/robot/send?access_token={dingding token}'
+        develop_group_notice_url = 'https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxxxxxxxxxxxxxxxxxx'
         headers = {
             'Content-Type': 'application/json;charset=utf-8',
         }

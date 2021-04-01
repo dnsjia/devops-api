@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from api.models import Project, Ticket, VirtualHost, DeployTask, DeployStatusChart
+#from utils.jwt_middleware import TokenAuth
 from api.utils.authorization import MyAuthentication
 from api.utils.permissions import MyPermission
 from utils.serializer import DeployStatusChartModelSerializers
@@ -23,7 +24,7 @@ logger = logging.getLogger('default')
 
 
 class DashboardChart(APIView):
-
+    # authentication_classes = [JSONWebTokenAuthentication, TokenAuth]
     authentication_classes = [MyAuthentication]
     permission_classes = [MyPermission]
 
@@ -50,7 +51,7 @@ class DashboardChart(APIView):
             return JsonResponse(data={"errcode": 0, "msg": "success", "data": count_data})
 
         except BaseException as e:
-            logger.error('获取仪表盘统计数据失败, 异常原因: %s' % str(traceback.format_exc()))
+            logger.error('获取仪表盘统计数据失败, 异常原因: %s' % str(traceback.format_exc()), e)
             return JsonResponse(data={"errcode": 5003, "msg": "获取数据失败", "data": "null"})
 
 
@@ -80,7 +81,7 @@ class DeployChart(APIView):
             }, json_dumps_params={'ensure_ascii': False})
 
         except BaseException as e:
-            logger.error('获取仪表盘一周部署统计数据失败, 异常原因: %s' % str(traceback.format_exc()))
+            logger.error('获取仪表盘一周部署统计数据失败, 异常原因: %s' % str(traceback.format_exc()), e)
 
             return JsonResponse(data={
                 "errcode": 5006,

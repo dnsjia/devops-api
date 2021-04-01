@@ -44,7 +44,7 @@ class NodeVies(APIView):
             page_publish_list = paginator.paginate_queryset(tmp_context, self.request, view=self)
             context['data'] = page_publish_list
         except Exception as e:
-            logger.error('获取节点信息失败：%s' % str(traceback.format_exc()))
+            logger.error('获取节点信息失败：%s' % str(traceback.format_exc()), e)
             context['msg'] = '获取失败'
             context['errcode'] = 1000
         return Response(context)

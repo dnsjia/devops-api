@@ -24,6 +24,7 @@ class RandCode():
         code = {}
         num = '123456789'
         send_message_code = ''.join(random.choice(num) for i in range(6))
+        # send_message_code = ''.join(random.choice(string.digits) for i in range(6))
         code["code"] = send_message_code
 
         return code

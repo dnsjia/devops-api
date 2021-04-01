@@ -10,15 +10,12 @@
 import asyncio
 import os
 import paramiko
-from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer
 from channels.exceptions import StopConsumer
-import subprocess
-from channels.layers import get_channel_layer
 from api.models import BuildHistory
 import logging
 logger = logging.getLogger('default')
-from decouple import config
+
 CONSUMER_OBJECT_LIST = []
 
 
@@ -51,13 +48,13 @@ class TailLogsConsumer(WebsocketConsumer):
 
         build_id = obj.build_id
         project_name = obj.app_name
-        command = 'sudo tail -n 100 -f %s/%s/builds/%s/log' % (config('JENKINS_JOB_PATH'), project_name, build_id)
+        command = 'sudo tail -n 100 -f /data/es-data/jenkins/jobs/%s/builds/%s/log' % (project_name, build_id)
         # 远程连接服务器
-        remote_ip = config('SSH_HOST')
-        username = config('SSH_USERNAME')
-        port = config('SSH_PORT')
+        remote_ip = 'xxxxxxxx'
+        username = 'xxxxxxx'
+        port = 22
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        private_key = paramiko.RSAKey.from_private_key_file(BASE_DIR + '\\api\\utils\\user-dev')
+        private_key = paramiko.RSAKey.from_private_key_file(BASE_DIR + '\\api\\utils\\dev')
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(hostname=remote_ip, port=port, username=username, pkey=private_key, timeout=15)
@@ -84,7 +81,7 @@ class TailLogsConsumer(WebsocketConsumer):
                     # 此处将获取的数据解码成gbk的存入本地日志
                     st = recv.decode('utf-8').split('\n')
                     for i in st:
-                        #logger.info("获取日志成功")
+                        # logger.info("获取日志成功")
                         self.send('{"errcode": 0, "msg": "获取日志成功", "data": "%s"}' % conv.convert(str(i).strip(), full=False))
 
             except KeyboardInterrupt:

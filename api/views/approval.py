@@ -10,12 +10,10 @@
 """
 import traceback
 from django.db.models import Q
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from rest_framework import serializers, status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from api.models import ApprovedGroup, DeployTask
 from api.utils.authorization import MyAuthentication
 from api.utils.permissions import MyPermission
@@ -23,7 +21,6 @@ from utils.rest_page import StandardResultsSetPagination
 from utils.serializer import ApprovalListSerializer
 import logging
 logger = logging.getLogger('default')
-from django.core import serializers as sers
 
 
 class ApprovalSerializer(serializers.ModelSerializer):
@@ -156,6 +153,7 @@ class ApprovalAllView(APIView):
             return JsonResponse(data={"errcode": 0, "msg": "success", "data": data})
 
         except BaseException as e:
+            logger.error(e)
             return JsonResponse(data={
                 "errcode": "1006",
                 "msg": "系统异常, 请刷新重试!",

@@ -23,7 +23,7 @@ logger = logging.getLogger('default')
 server = jenkins.Jenkins(config('JENKINS_URL'), username=config('JENKINS_USER'), password=config('JENKINS_PASS'))
 
 
-class JenkinsStauts(object):
+class JenkinsStatus(object):
 
     @classmethod
     def jenkins_task_status(self, project_name: str, build_id: int, task_id: str) -> dict:
@@ -39,14 +39,14 @@ class JenkinsStauts(object):
         next_id = build_id
         time.sleep(10)
         while True:
-            if server.get_build_info(project_name, next_id)['building'] == True:
+            if server.get_build_info(project_name, next_id)['building']:
                 time.sleep(10)
             else:
                 break
 
-        result = {}
-        result['url'] = "{0}{1}".format(job_url, next_id)
-        result['result'] = server.get_build_info(project_name, next_id)['result']
+        result = {'url': "{0}{1}".format(job_url, next_id),
+                  'result': server.get_build_info(project_name, next_id)['result']}
+
         queryset = DeployTask.objects.filter(task_id=task_id).first()
         if result.get("result") == 'SUCCESS':
             logger.info("任务：%s构建成功, 任务编号：%d" % (project_name, next_id))
@@ -57,11 +57,12 @@ class JenkinsStauts(object):
                 if project_name in sync_job_name:
                     logger.info("2分钟后开始将：%s代码从A1机器同步集群A2机器" % project_name)
                     DeployLogs.objects.create(task_id=task_id, status=3, message='A组机器已部署完成， 等待同步集群节点 ')
-                    time.sleep(random.randint(5,15))
+                    time.sleep(random.randint(5, 15))
                     DeployLogs.objects.create(task_id=task_id, status=3, message='正在同步集群数据， 此过程大约耗时5~15分钟! ')
                     # 任务构建成功后调用异步sync_job_code_cluster方法自动同步集群项目
                     rsyc_result = tasks.sync_code_job_cluster.delay(project_name, task_id)
-                    logger.info('项目: %s 集群同步构建状态异步任务返回ID: %s, 状态: %s' % (project_name, str(rsyc_result.id), str(rsyc_result.state)))
+                    logger.info('项目: %s 集群同步构建状态异步任务返回ID: %s, 状态: %s' % (
+                        project_name, str(rsyc_result.id), str(rsyc_result.state)))
                 else:
                     DeployLogs.objects.create(task_id=task_id, status=4, message='项目部署成功 ')
                     queryset = DeployTask.objects.filter(task_id=task_id).first()
@@ -79,14 +80,14 @@ class JenkinsStauts(object):
                                 UserInfo.objects.filter(username=_user).values('mobile')[0]['mobile'])
                         # 调用异步通知
                         data = "您负责的应用【%s】已部署上线， 部署版本： %s \n 提交人： %s  \n上线原因： %s， 请及时关注！ " % (
-                        project_name, queryset.version, queryset.submit_people, queryset.title)
+                            project_name, queryset.version, queryset.submit_people, queryset.title)
                         tasks.deploy_send_develop_dingtalk_group.delay(data, at_develop_user_list)
                     except BaseException as e:
                         print(e)
                         logger.error("发送研发人通知失败, 原因: %s" % str(traceback.format_exc()))
 
             else:
-                logger.info('释放任务锁，%s' %(project_name,))
+                logger.info('释放任务锁，%s' % (project_name,))
                 conn_redis.delete(project_name + "_lock")
                 DeployLogs.objects.create(
                     task_id=task_id,
@@ -106,7 +107,7 @@ class JenkinsStauts(object):
                             UserInfo.objects.filter(username=_user).values('mobile')[0]['mobile'])
                     # 调用异步通知
                     data = "您负责的应用【%s】已部署上线， 部署版本： %s \n 提交人： %s  \n上线原因： %s， 请及时关注！ " % (
-                    project_name, queryset.version, queryset.submit_people, queryset.title)
+                        project_name, queryset.version, queryset.submit_people, queryset.title)
                     tasks.deploy_send_develop_dingtalk_group.delay(data, at_develop_user_list)
                 except BaseException as e:
                     print(e)
@@ -120,7 +121,7 @@ class JenkinsStauts(object):
                 status=6,
                 message='部署失败， 请通过日志查看失败原因！ ')
 
-            logger.info("任务: %s构建失败,任务编号：%d 释放锁:%s" % (project_name, next_id, project_name+"_lock"))
+            logger.info("任务: %s构建失败,任务编号：%d 释放锁:%s" % (project_name, next_id, project_name + "_lock"))
             queryset.status = 5
             queryset.save()
 
@@ -138,7 +139,6 @@ class JenkinsStauts(object):
 
         return next_id
 
-
     @classmethod
     def jenkins_sync_status(self, project_name: str, build_id: int, task_id: str) -> dict:
         """
@@ -152,14 +152,14 @@ class JenkinsStauts(object):
         job_url = server.get_job_info(project_name)['url']
         time.sleep(10)
         while True:
-            if server.get_build_info(project_name, build_id)['building'] == True:
+            if server.get_build_info(project_name, build_id)['building']:
                 time.sleep(10)
             else:
                 break
 
-        result = {}
-        result['url'] = "{0}{1}".format(job_url, build_id)
-        result['result'] = server.get_build_info(project_name, build_id)['result']
+        result = {'url': "{0}{1}".format(job_url, build_id),
+                  'result': server.get_build_info(project_name, build_id)['result']}
+
         queryset_2 = SyncJobHistory.objects.filter(sync_id=build_id).first()
 
         if result.get("result") == 'SUCCESS':
@@ -184,7 +184,9 @@ class JenkinsStauts(object):
                     _user = user.split('@')[1]
                     at_develop_user_list.append(UserInfo.objects.filter(username=_user).values('mobile')[0]['mobile'])
                 # 调用异步通知
-                data = "您负责的应用【%s】已部署上线， 部署版本： %s \n 提交人： %s  \n上线原因： %s， 请及时关注！ " % (lock.title, queryset.version, queryset.submit_people, queryset.title)
+                data = "您负责的应用【%s】已部署上线， 部署版本： %s \n 提交人： %s  \n上线原因： %s， 请及时关注！ " % (
+                    lock.title, queryset.version, queryset.submit_people, queryset.title
+                )
                 tasks.deploy_send_develop_dingtalk_group.delay(data, at_develop_user_list)
             except BaseException as e:
                 print(e)
@@ -221,13 +223,12 @@ class JenkinsStauts(object):
         next_id = build_id
         time.sleep(10)
         while True:
-            if server.get_build_info(project_name, next_id)['building'] == True:
+            if server.get_build_info(project_name, next_id)['building']:
                 time.sleep(10)
             else:
                 break
-        result = {}
-        result['url'] = "{0}{1}".format(job_url, next_id)
-        result['result'] = server.get_build_info(project_name, next_id)['result']
+        result = {'url': "{0}{1}".format(job_url, next_id),
+                  'result': server.get_build_info(project_name, next_id)['result']}
 
         if result.get("result") == 'SUCCESS':
             logger.info("回滚-> 任务：%s构建成功, 任务编号：%d" % (project_name, next_id))
@@ -235,17 +236,18 @@ class JenkinsStauts(object):
 
             if project_name in sync_job_name:
                 logger.info("2分钟后开始将：%s代码从A1机器同步集群A2机器" % project_name)
-                time.sleep(random.randint(3,10))
+                time.sleep(random.randint(3, 10))
                 # DeployLogs.objects.create(task_id=task_id, status=3, message='正在同步集群数据, 此过程大约耗时5~15分钟! ')
                 # 任务构建成功后调用异步sync_job_code_cluster方法自动同步集群项目
                 rsyc_result = tasks.rollback_sync_code_job_cluster.delay(project_name, build_id)
-                logger.info('回滚-> 项目: %s 集群同步构建状态异步任务返回ID: %s, 状态: %s' % (project_name, str(rsyc_result.id), str(rsyc_result.state)))
+                logger.info('回滚-> 项目: %s 集群同步构建状态异步任务返回ID: %s, 状态: %s' % (
+                    project_name, str(rsyc_result.id), str(rsyc_result.state)))
             else:
                 # todo 发送回滚部署成功dingtalk通知
-                logger.info('回滚任务：%s, 属于单机项目无集群机器, 跳过同步。' % (project_name))
+                logger.info('回滚任务：%s, 属于单机项目无集群机器, 跳过同步。' % project_name)
         else:
             # TODO 部署失败钉钉通知
             conn_redis.delete(project_name + "_lock")
-            logger.info("回滚-> 任务: %s回滚失败, 任务编号：%d 释放锁:%s" % (project_name, next_id, project_name+"_lock"))
+            logger.info("回滚-> 任务: %s回滚失败, 任务编号：%d 释放锁:%s" % (project_name, next_id, project_name + "_lock"))
 
         return result

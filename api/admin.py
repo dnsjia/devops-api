@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy
-from api.models import InnerAccount, AccountType, DatabaseRecord, GrayDomain
+# Register your models here.
+from api.models import InnerAccount, DatabaseRecord, GrayDomain
 from api.models import Project
 from api.models import Ticket
 from api.models import  DeployTask

@@ -15,10 +15,8 @@ import redis
 from django.db import transaction
 from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from api.models import GrayType, GrayDomain
 from api.utils.authorization import MyAuthentication
 from api.utils.permissions import MyPermission
@@ -50,7 +48,7 @@ class GrayServerView(APIView):
             return Response(gray_page.data)
 
         except BaseException as e:
-            logger.error('系统异常, 异常原因: %s' % str(traceback.format_exc()))
+            logger.error('系统异常, 异常原因: %s' % str(traceback.format_exc()), e)
             return JsonResponse(data={
                 "errcode": "1006",
                 "msg": "系统异常, 请刷新重试!",
@@ -112,7 +110,7 @@ class GrayDomainView(APIView):
                             return JsonResponse(data={"msg": "UserAgent规则创建成功", "errcode": 0})
 
                     except Exception as e:
-                        logger.error('添加灰度规则失败, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('添加灰度规则失败, 异常原因: %s' % str(traceback.format_exc()), e)
                         pass
 
                 elif rule_type == "Cookie":
@@ -160,13 +158,13 @@ class GrayDomainView(APIView):
                             return JsonResponse(data={"msg": "IP规则创建成功", "errcode": 0})
 
                     except Exception as e:
-                        logger.error('添加灰度规则出错, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('添加灰度规则出错, 异常原因: %s' % str(traceback.format_exc()), e)
                         pass
 
                 elif rule_type == "MQSwitch":
                     '''
-                    Trip 启动后Java代码先取本机IP，再从redis hash GRAY_IP_MQ中取到灰度ip地址,开1、关0
-                    如果ip存在GRAY_IP_MQ中则进行mq的灰度, mq灰度机制是读取trip mq配置文件拼接新的mq topic名称
+                    Trip-Service 启动后Java代码先取本机IP，再从redis hash GRAY_IP_MQ中取到灰度ip地址,开1、关0
+                    如果ip存在GRAY_IP_MQ中则进行mq的灰度, mq灰度机制是读取trip-service mq配置文件拼接新的mq topic名称
                     如： mq的topic名称为 FLIGHT , 拼接后的新mq topic名称为FLIGHT_Gray
                     '''
                     try:
@@ -182,14 +180,14 @@ class GrayDomainView(APIView):
                             return JsonResponse(data={"msg": "MQSwitch规则创建成功", "errcode": 0})
 
                     except Exception as e:
-                        pass
+                        logger.error(e)
 
                 else:
                     logger.error("灰度规则错误")
                     return JsonResponse(data={"msg": "灰度规则错误", "errcode": 500})
 
         except BaseException as e:
-            logger.error('添加灰度规则失败, 异常原因: %s' % str(traceback.format_exc()))
+            logger.error('添加灰度规则失败, 异常原因: %s' % str(traceback.format_exc()), e)
             return JsonResponse(data={'errcode': 500, 'msg': '添加失败'})
 
     def delete(self, request, *args, **kwargs):
@@ -223,6 +221,6 @@ class GrayDomainView(APIView):
                 raise Exception('灰度规则删除失败！')
             logger.info("灰度规则删除成功, 操作人: %s" % str(request.user.name))
             return JsonResponse(data={'errcode': 0, 'msg': '删除成功！'})
-        except Exception:
-            logger.error('删除灰度规则失败, 异常原因: %s' % str(traceback.format_exc()))
+        except Exception as e:
+            logger.error('删除灰度规则失败, 异常原因: %s' % str(traceback.format_exc()), e)
             return JsonResponse(data={'errcode': 9999, 'msg': '删除失败！'})

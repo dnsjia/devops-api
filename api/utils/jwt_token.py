@@ -9,7 +9,6 @@ import jwt
 import datetime
 from jwt import exceptions
 from django.conf import settings
-from api.models import UserInfo
 import logging
 logger = logging.getLogger('default')
 

@@ -6,7 +6,7 @@
 # @Date  : 2020/12/7
 # @Desc  :
 from django.urls import path
-from k8s import views
+from k8s.views.logs import LogsView
 from k8s.views.deployment import DeploymentViews, DetailDeploymentViews
 from k8s.views.pod import PodViews, DetailPodView
 from k8s.views.node import NodeVies
@@ -19,6 +19,7 @@ urlpatterns = [
     path('namespaces/', NamespaceView.as_view(), name='namespaces'),
     path('pods/', PodViews.as_view(), name='pods'),
     path('pod', DetailPodView.as_view(), name='pod'),
+    path('logs', LogsView.as_view(), name='logs'),
     path('deployments/', DeploymentViews.as_view(), name='deployments'),
     path('deployment', DetailDeploymentViews.as_view(), name='deployment'),
 ]

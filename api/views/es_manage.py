@@ -8,9 +8,7 @@
 from decouple import config
 from django.http import JsonResponse
 from elasticsearch import Elasticsearch
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 import traceback
 from api.utils.permissions import MyPermission
 from devops.settings import BASE_DIR
@@ -39,14 +37,19 @@ class ElasticSearchView(APIView):
             id = 0
             for index in rst:
                 id += 1
-                index_list.append({'id': id, 'index_name': index})
+                # 索引以 . 开头的不做处理忽略掉, 如.monitoring*
+                if str(index).startswith('.'):
+                    continue
+                else:
+                    index_list.append({'id': id, 'index_name': index})
+
             data = {
                 'data': index_list,
                 'errcode': 0
             }
             return JsonResponse(data=data)
-        except BaseException:
-            logger.error('请求异常，%s' %(str(traceback.format_exc())))
+        except BaseException as e:
+            logger.error('请求异常，%s' %(str(traceback.format_exc())), e)
             return JsonResponse(data={'errcode': 500, 'msg': '请求异常,请稍后再试！'})
 
     def post(self, request, *args, **kwargs):
@@ -80,8 +83,8 @@ class ElasticSearchView(APIView):
             except NotFoundError:
                 logger.warning('文档id不存在:%s' %str(traceback.format_exc()))
                 return JsonResponse(data={'errcode': 404, 'msg': '文档id不存在！'})
-            except BaseException:
-                logger.error('请求异常，%s' %(str(traceback.format_exc())))
+            except BaseException as e:
+                logger.error('请求异常，%s' %(str(traceback.format_exc())), e)
                 return JsonResponse(data={'errcode': 500, 'msg': '请求异常,请稍后再试！'})
 
         elif request_data.get('request_methods') == 'post':
@@ -98,8 +101,8 @@ class ElasticSearchView(APIView):
                     'file': 'http://owa.srv.pigs.com/download/files/es/' + file_name
                 }
                 return JsonResponse(data=data)
-            except BaseException:
-                logger.error('请求异常，%s' %(str(traceback.format_exc())))
+            except BaseException as e:
+                logger.error('请求异常，%s' %(str(traceback.format_exc())), e)
                 return JsonResponse(data={'errcode': 500, 'msg': '请求异常,请稍后再试！'})
         else:
             return JsonResponse(data={'errcode': 403, 'msg': '请求的方法不允许！'})

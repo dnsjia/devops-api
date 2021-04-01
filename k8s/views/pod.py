@@ -36,7 +36,6 @@ class PodViews(APIView):
                 ret = v1.list_namespaced_pod(namespace=namespace)
             else:
                 ret = v1.list_namespaced_pod(namespace='default')
-                # ret = v1.list_pod_for_all_namespaces(watch=False)
             tmp_context = []
             for i in ret.items:
                 tmp_dict = dict()
@@ -44,10 +43,13 @@ class PodViews(APIView):
                 tmp_dict['namespace'] = i.metadata.namespace
                 from django.utils import timezone
                 tmp_dict['create_time'] = timezone.localtime(i.metadata.creation_timestamp).strftime("%Y-%m-%d %H:%M:%S")
-                # print(timezone.localtime(i.metadata.creation_timestamp).strftime("%Y-%m-%d %H:%M:%S"))
                 tmp_dict['name'] = i.metadata.name
                 tmp_dict['host_ip'] = i.status.host_ip
-                tmp_dict['status'] = i.status.phase
+
+                if i.status.container_statuses is not None and i.status.container_statuses[0].state.waiting is not None:
+                    tmp_dict['status'] = i.status.container_statuses[0].state.waiting.reason
+                else:
+                    tmp_dict['status'] = i.status.phase
                 # 当pod处于Pending状态, 此时pod重启次数 i.status.phase 信息为 None
                 # 如果为None, 则返回 0
                 tmp_dict['restart_count'] = [0 if i.status.container_statuses is None else i.status.container_statuses[0].restart_count][0]
@@ -89,7 +91,7 @@ class DetailPodView(APIView):
         name = request.query_params.dict().get('name')
         namespace = request.query_params.dict().get('namespace', 'default')
         # 允许可删除命名空间下的pod
-        allow_delete_namespace_in_pod = ['dev', 'feiba', 'flyby', 'new', 'test', 'yikuaiban']
+        allow_delete_namespace_in_pod = ['dev', 'new', 'test']
         if not request.user.is_superuser:
             if namespace not in allow_delete_namespace_in_pod:
                 return JsonResponse(data={'errcode': 403, 'msg': '无权限删除！'})
@@ -101,7 +103,7 @@ class DetailPodView(APIView):
                 context['errcode'] = 1000
                 context['msg'] = ret
         except Exception as e:
-            logger.error('删除pod失败：%s' % str(traceback.format_exc()))
+            logger.error('删除pod失败：%s' % str(traceback.format_exc()), e)
             context['errcode'] = 1000
             context['msg'] = '删除失败'
         return Response(context)

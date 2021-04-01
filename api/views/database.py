@@ -12,7 +12,6 @@ from api.utils.authorization import MyAuthentication
 import logging
 import ast
 from decouple import config
-
 from api.utils.permissions import MyPermission
 from utils.rest_page import StandardResultsSetPagination
 from utils.serializer import DbAccountRecordrListModelSerializers
@@ -184,7 +183,7 @@ class DatabaseView(APIView):
                         # 更新权限
                         update_pms = ','.join(db_permissions)
                         sql = f"grant {update_pms} ON {obj.database_name}.* to {obj.account}@'%';"
-                        logger.info("更新用户权限：%s" %(sql))
+                        logger.info("更新用户权限：%s" % sql)
                         cursor.execute(sql)
                         cursor.execute("flush privileges")
                         cursor.close()
@@ -193,7 +192,7 @@ class DatabaseView(APIView):
                         return JsonResponse(data={'errcode': 0, 'msg': '权限更新成功'})
 
                     except BaseException as e:
-                        logger.error('权限更新异常, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('权限更新异常, 异常原因: %s' % str(traceback.format_exc()), e)
                         return JsonResponse(data={'errcode': 500, 'msg': '权限更新异常'})
 
                 else:
@@ -202,7 +201,7 @@ class DatabaseView(APIView):
                         add_pms = ['create', 'index', 'alter']
                         update_pms = ','.join(db_permissions + add_pms)
                         sql = f"grant {update_pms} ON {obj.database_name}.* to {obj.account}@'%';"
-                        logger.info("更新用户权限：%s" %(sql))
+                        logger.info("更新用户权限：%s" % sql)
                         cursor.execute(sql)
                         cursor.execute("flush privileges")
                         cursor.close()
@@ -210,7 +209,7 @@ class DatabaseView(APIView):
                         obj.save()
                         return JsonResponse(data={'errcode': 0, 'msg': '权限更新成功'})
                     except BaseException as e:
-                        logger.error('权限更新异常, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('权限更新异常, 异常原因: %s' % str(traceback.format_exc()), e)
                         return JsonResponse(data={'errcode': 500, 'msg': '权限更新异常'})
 
             else:
@@ -226,12 +225,12 @@ class DatabaseView(APIView):
                     str(obj.account),
                     str(password)
                 )
-                url = 'other-mysql-pigs-100.mysql.svc.pigs.com'
+                url = 'mysql.svc.pigs.com'
 
                 if 'update' in db_permissions:
                     try:
                         create_sql = f"grant {new_pms} on {obj.database_name}.* to {obj.account}@'%' identified by '{password}'"
-                        logger.info("用户选择了update, SQL语句%s" %(create_sql))
+                        logger.info("用户选择了update, SQL语句%s" % create_sql)
                         # TODO 用户创建成功，通知
                         cursor.execute(create_sql)
                         cursor.execute("flush privileges")
@@ -242,13 +241,13 @@ class DatabaseView(APIView):
                         send_deploy_email.delay(str(obj.account) + '@pigs.com', obj.applicant, title, msg, msg_en, url, subject=title)
                         return JsonResponse(data={'errcode': 0, 'msg': '用户创建成功'})
                     except BaseException as e:
-                        logger.error('权限更新异常, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('权限更新异常, 异常原因: %s' % str(traceback.format_exc()), e)
                         return JsonResponse(data={'errcode': 500, 'msg': '权限更新异常'})
                 else:
                     try:
                         pms = ','.join(db_permissions)
                         create_sql = f"grant {pms} on {obj.database_name}.* to {obj.account}@'%' identified by '{password}'"
-                        logger.info("用户没有选择update, SQL语句：%s" %(create_sql))
+                        logger.info("用户没有选择update, SQL语句：%s" % create_sql)
                         # TODO 用户创建成功，通知
                         cursor.execute(create_sql)
                         cursor.execute("flush privileges")
@@ -259,5 +258,5 @@ class DatabaseView(APIView):
                         send_deploy_email.delay(str(obj.account) + '@pigs.com', obj.applicant, title, msg, msg_en, url, subject=title)
                         return JsonResponse(data={'errcode': 0, 'msg': '用户创建成功'})
                     except BaseException as e:
-                        logger.error('权限更新异常, 异常原因: %s' % str(traceback.format_exc()))
+                        logger.error('权限更新异常, 异常原因: %s' % str(traceback.format_exc()), e)
                         return JsonResponse(data={'errcode': 500, 'msg': '权限更新异常'})

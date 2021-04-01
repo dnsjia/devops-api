@@ -34,14 +34,12 @@ class JenkinsStauts(object):
         next_id = build_id
         time.sleep(10)
         while True:
-            if server.get_build_info(job_name, next_id)['building'] == True:
+            if server.get_build_info(job_name, next_id)['building']:
                 time.sleep(10)
             else:
                 break
-
-        result = {}
-        result['url'] = "{0}{1}".format(job_url, next_id)
-        result['result'] = server.get_build_info(job_name, next_id)['result']
+        result = {'url': "{0}{1}".format(job_url, next_id),
+                  'result': server.get_build_info(job_name, next_id)['result']}
 
         queryset = DeployTask.objects.filter(id=pk).first()
         if result.get("result") == 'SUCCESS':
@@ -89,14 +87,13 @@ class JenkinsStauts(object):
         job_url = server.get_job_info(job_name)['url']
         time.sleep(10)
         while True:
-            if server.get_build_info(job_name, build_id)['building'] == True:
+            if server.get_build_info(job_name, build_id)['building']:
                 time.sleep(10)
             else:
                 break
 
-        result = {}
-        result['url'] = "{0}{1}".format(job_url, build_id)
-        result['result'] = server.get_build_info(job_name, build_id)['result']
+        result = {'url': "{0}{1}".format(job_url, build_id),
+                  'result': server.get_build_info(job_name, build_id)['result']}
 
         queryset_2 = SyncJobHistory.objects.filter(sync_id=build_id).first()
         if result.get("result") == 'SUCCESS':

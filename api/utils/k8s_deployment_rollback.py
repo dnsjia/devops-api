@@ -45,6 +45,7 @@ class KubernetesApi:
             logger.info("Deployment updated. status='%s'" % str(api_response.status))
             return {'msg': 'success', 'errcode': 0}
         except BaseException as e:
+            logger.error(e)
             logger.error("回滚deployment异常，%s" % str(traceback.format_exc()))
             return {'msg': 'fail', 'errcode': 500}
 

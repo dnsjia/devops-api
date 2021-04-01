@@ -16,13 +16,11 @@ from decouple import config
 from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.forms import model_to_dict
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from api.models import UserInfo, VirtualHost
+from api.models import VirtualHost
 from api.utils.authorization import MyAuthentication
 from api.utils.permissions import MyPermission
 from utils.rest_page import StandardResultsSetPagination
@@ -90,7 +88,7 @@ class AddHostNginxView(APIView):
         if request.method == 'POST':
             try:
                 request_data = json.loads(request.body.decode('utf-8'))['params']
-                logger.info('新增虚拟主机data={%s}' % (request_data))
+                logger.info('新增虚拟主机data={%s}' % request_data)
                 internet_port = request_data.get('internet_port')
                 if internet_port is None or internet_port == '':
                     return JsonResponse(data={'errcode': 400, 'msg': '端口不能为空！'})
@@ -172,8 +170,8 @@ class AddHostNginxView(APIView):
                 except IntegrityError:
                    logger.error(str(traceback.format_exc()))
 
-            except BaseException:
-                logger.info('新增虚拟主机失败,异常原因：%s' % str(traceback.format_exc()))
+            except BaseException as e :
+                logger.info('新增虚拟主机失败,异常原因：%s' % str(traceback.format_exc()), e)
                 return JsonResponse(data={'errcode': 400, 'msg': '新增失败'})
 
     def put(self, request, *args, **kwargs):
@@ -205,8 +203,8 @@ class AddHostNginxView(APIView):
             rsp_consul = json.loads(get_service.content.decode('utf-8'))
             logger.info('获取Upstream服务返回信息: %s' % rsp_consul)
 
-        except BaseException:
-            logger.error('获取服务信息异常，更新主机失败！异常原因：%s' % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error('获取服务信息异常，更新主机失败！异常原因：%s' % str(traceback.format_exc()), e)
             logger.error(str(get_service.content.decode('utf-8')))
             return JsonResponse(data={'errcode': 500, 'msg': '更新失败！'})
 
@@ -250,8 +248,8 @@ class AddHostNginxView(APIView):
             logger.error('获取ServiceID失败, %s' % str(traceback.format_exc()))
             return JsonResponse(data={'errcode': 9999, 'msg': '更新失败'})
 
-        except BaseException:
-            logger.error('更新虚拟主机失败, 异常原因: %s' % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error('更新虚拟主机失败, 异常原因: %s' % str(traceback.format_exc()), e)
             return JsonResponse(data={'errcode': 9999, 'msg': '更新失败'})
 
     def delete(self, request, *args, **kwargs):
@@ -295,6 +293,6 @@ class AddHostNginxView(APIView):
                 logger.error('删除consul服务失败, consul返回信息：%s' % rsp)
                 return JsonResponse(data={'errcode': 500, 'msg': rsp})
 
-        except BaseException:
-            logger.error('删除服务失败, 异常返回信息：%s' % str(traceback.format_exc()))
+        except BaseException as e:
+            logger.error('删除服务失败, 异常返回信息：%s' % str(traceback.format_exc()), e)
             return JsonResponse(data={'errcode': 500, 'msg': '删除失败'})

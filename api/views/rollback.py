@@ -14,16 +14,14 @@ import traceback
 from decouple import config
 from django.http import JsonResponse
 from django_redis import get_redis_connection
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from api.models import Project, DeployRollBack
 from api.utils.permissions import MyPermission
 from utils.check_jenkins import JenkinsStauts
 from api.utils.authorization import MyAuthentication
 from utils.serializer import DeployRollBackModelSerializers
 from jenkinsapi.jenkins import Jenkins
-from api.tasks import rollback_sync_code_job_cluster, check_rollback_status
+from api.tasks import check_rollback_status
 import logging
 logger = logging.getLogger('default')
 conn_redis = get_redis_connection('default')
@@ -55,7 +53,7 @@ class DeployRollBackView(APIView):
                 return JsonResponse({"errcode": -1, "msg": "没有可回退的版本", "data": []},json_dumps_params={'ensure_ascii': False})
 
         except BaseException as e:
-            logger.error('没有可回退的版本, 异常原因: %s' % str(traceback.format_exc()))
+            logger.error('没有可回退的版本, 异常原因: %s' % str(traceback.format_exc()), e)
             return JsonResponse({"errcode": 404, "msg": "没有可回退的版本", "data": "null"}, json_dumps_params={'ensure_ascii': False})
 
     def post(self, request, *args , **kwargs):
@@ -106,7 +104,7 @@ class DeployRollBackView(APIView):
                     return JsonResponse(data={"msg": "项目版本回退中, 稍后请注意钉钉通知", "errcode": 0})
 
                 except BaseException as e:
-                    logger.error('回滚失败, 请及时检查失败原因 %s' % str(traceback.format_exc()))
+                    logger.error('回滚失败, 请及时检查失败原因 %s' % str(traceback.format_exc()), e)
         else:
             lock = conn_redis.get(project_name + "_lock")
             logger.info("获取任务锁: %s" % lock)
@@ -135,7 +133,7 @@ class DeployRollBackView(APIView):
                             "msg": "回滚任务已开始，稍后请注意钉钉通知", "data": []},json_dumps_params={'ensure_ascii': False})
 
                     except BaseException as e:
-                        logger.error('回滚失败, 请及时检查失败原因 %s' % str(traceback.format_exc()))
+                        logger.error('回滚失败, 请及时检查失败原因 %s' % str(traceback.format_exc()), e)
 
                 return JsonResponse(data={
                     "errcode": 404,
@@ -173,7 +171,7 @@ class CreateDeployBackupView(APIView):
                 return JsonResponse(data={'errcode': 0, 'msg': '备份成功'}, json_dumps_params={'ensure_ascii': False})
 
             except BaseException as e:
-                logger.error(f'备份失败，{request.body}')
+                logger.error(f'备份失败，{request.body}', e)
                 logger.error('备份失败, 异常原因: %s' % str(traceback.format_exc()))
                 return JsonResponse(data={'errcode': 500, 'msg': '备份异常'}, json_dumps_params={'ensure_ascii': False})
         else:

@@ -22,7 +22,7 @@ from rest_framework.documentation import include_docs_urls
 
 from api.views.download import DownLoadFile
 from devops import settings
-admin.site.site_header = "运维管理后台"
+admin.site.site_header = "小飞猪运维管理后台"
 admin.site.site_title = "Pigs Admin Portal"
 admin.site.index_title = "Welcome to Pigs Operation Portal"
 

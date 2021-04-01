@@ -16,9 +16,7 @@ import uuid
 from datetime import datetime
 from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from devops.settings import BASE_DIR
 from utils.csrf_disable import CsrfExemptSessionAuthentication
 import logging
@@ -81,8 +79,7 @@ class UploadView(APIView):
             response['errcode'] = 0
             response['data'] = file_info
             print(file_info)
-            #logger.info("%s文件上传成功, 上传人: %s" % (test_repo_name, request.user.name))
-            logger.info("%s文件上传成功, 上传人:" % (test_repo_name))
+            logger.info("%s文件上传成功, 上传人:" % test_repo_name)
             return JsonResponse(data=response)
 
         except Exception as e:
@@ -148,9 +145,7 @@ class CaseUploadView(APIView):
             response['msg'] = "文件上传成功!"
             response['errcode'] = 0
             response['data'] = file_info
-            print(file_info)
-            # logger.info("%s文件上传成功, 上传人: %s" % (test_repo_name, request.user.name))
-            logger.info("%s文件上传成功, 上传人:" % (test_repo_name))
+            logger.info("%s文件上传成功, 上传人:" % test_repo_name)
             return JsonResponse(data=response)
 
         except Exception as e:
