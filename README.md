@@ -26,17 +26,46 @@ https://github.com/small-flying-pigs/devops
 
 ![LOGIN](img/login.png)</br>
 
-### 仪表盘界面
-展现一周应用部署情况、应用个数、工单等</br>
+### 资产管理
+![RUN](img/server2.png)
+![RUN](img/server.png)
+![RUN](img/server_ssh.png)
 
-![DASHBOARD](img/home.png)
+### 作业管理
+![RUN](img/job.png)
+![RUN](img/job2.png)
+![RUN](img/send_file.png)
 
 
-### K8S deployment管理
+### Kubernetes管理
 
-可以对Pod进行删除重启
+Node节点池
 
-![RUN](img/pods.png)
+![RUN](img/node.png)
+
+Node详情页
+![RUN](img/node_detail1.png)
+
+![RUN](img/k8s_detail2.png)
+
+Deployment 无状态服务
+![RUN](img/workload.png)
+
+扩缩容
+![RUN](img/scale.png)
+
+容器组
+![RUN](img/container.png)
+
+![RUN](img/container2.png)
+![RUN](img/container_logs.png)
+![RUN](img/container_ssh.png)
+pod在线编辑
+![RUN](img/yaml_edit.png)
+
+### JAVA应用在线诊断
+![RUN](img/app.png)
+![RUN](img/method.png)
 
 ## <a name="howtoinstall"> 如何安装 </a>
 devops-api依赖于python3.5以上、诸多python第三方模块、mysql数据库、redis缓存</br>
@@ -53,7 +82,7 @@ $ pip install -r requirements.txt
 
 
 #连接本地资源并创建数据表结构
-$ vim deveops-api/settings.py # 里面包含了所有连接数据以及定时任务 请填写您需要的数据内容
+$ vim deveops-api/.env # 里面包含了所有连接数据以及定时任务 请填写您需要的数据内容
 $ python manage.py makemigrations
 $ python manage.py migrate
 
@@ -63,7 +92,7 @@ $ python manage.py runserver &
 #默认启动在8000端口 你可能需要一个nginx做Web服务器
 
 ```
-
+注意： 请参考doc下面的相关文档, 推荐部署在Linux系统中。
 
 #### 启动定时任务和异步任务
 ```
@@ -71,9 +100,6 @@ celery -A devops beat -l info
 
 celery worker  -A devops --pool=solo -l INFO
 ```
-
-##### 废弃老的任务
-celery_tasks.tasks 
-
+#### 更多功能正在开发中.....
 
 #### 开发者QQ群： 258130203
