@@ -1,19 +1,4 @@
-/*
-Navicat MySQL Data Transfer
-
-Source Server         : 96-master
-Source Server Version : 50648
-Source Host           : 192.168.1.96:3306
-Source Database       : ops_test
-
-Target Server Type    : MYSQL
-Target Server Version : 50648
-File Encoding         : 65001
-
-Date: 2021-06-07 13:33:44
-*/
-
-SET FOREIGN_KEY_CHECKS=0;
+﻿SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
 -- Table structure for rbac_menu
