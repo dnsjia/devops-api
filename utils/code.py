@@ -1,12 +1,15 @@
 #!/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-@Time: 2020/10/12 15:38
-@Author: yu.jiang <safemonitor@outlook.com>
-@License: Apache License
-@File: code.py
+# Copyright: (c) SmallFlyingPigs Organization. https://github.com/small-flying-pigs
+# Copyright: (c) <pigs@dnsjia.com>
+# Released under the AGPL-3.0 License.
 
+
+"""
+@Time: 2021/5/17 0017 下午 6:09
+@Author: micheng. <safemonitor@outlook.com>
+@File: code.py
 """
 
 import random
@@ -62,3 +65,10 @@ class RandCode():
         eg: 23f87b528d0f11e696a7f45c89a84eed
         """
         return uuid.uuid1().hex
+
+    @classmethod
+    def uuid4_int(self):
+        """
+        return 28078616856779081225165040310201159828 int
+        """
+        return uuid.uuid4().int

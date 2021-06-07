@@ -10,14 +10,15 @@
 """
 
 from django.contrib.auth.backends import ModelBackend
-from api.models import UserInfo
 from django.db.models import Q
+
+from apps.account.models import User
 
 
 class MobileOrEmailBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
-            user = UserInfo.objects.get(Q(username=username) | Q(email=username) | Q(mobile=username))
+            user = User.objects.get(Q(username=username) | Q(email=username) | Q(mobile=username))
             if user.check_password(password):
                 return user
         except Exception as e:

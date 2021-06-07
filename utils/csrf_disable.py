@@ -1,15 +1,18 @@
 #!/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Copyright: (c) SmallFlyingPigs Organization. https://github.com/small-flying-pigs
+# Copyright: (c) <pigs@dnsjia.com>
+# Released under the AGPL-3.0 License.
+
+
 """
-@Time: 2020/11/11 16:02
-@Author: yu.jiang <safemonitor@outlook.com>
-@License: Apache License
+@Time: 2021/5/17 0017 下午 5:59
+@Author: micheng. <safemonitor@outlook.com>
 @File: csrf_disable.py
-
 """
 
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import SessionAuthentication
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):

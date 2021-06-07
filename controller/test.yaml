@@ -1,0 +1,7 @@
+- hosts: 192.168.1.11
+  #gather_facts: F   #开启debug
+  tasks:
+  - name: nslookup
+    shell: ping -c 4 www.baidu.com
+    ignore_errors: True
+    register: tomcat_out  #定义变量存储返回的结果

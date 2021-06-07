@@ -1,0 +1,7 @@
+server:
+  http:
+    address: "0.0.0.0"
+    port: "9988"
+    api_port: "8081"
+    token: "123456"
+    accept_hosts: "^*"
