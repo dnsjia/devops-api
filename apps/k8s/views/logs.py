@@ -66,7 +66,7 @@ class LogsView(APIView):
             data = v1.read_namespaced_pod_log(
                 name=pod, namespace=namespace, tail_lines=tail_line, follow=False, pretty=True
             )
-            print(data)
+
             return APIResponse(data=data.split('\n'))
         except ApiException as e:
             logger.warning("获取pod日志出错, 详细信息：%s" % str(traceback.format_exc()))
