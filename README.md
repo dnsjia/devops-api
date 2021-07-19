@@ -32,9 +32,9 @@ https://github.com/small-flying-pigs/devops
 ![RUN](img/server_ssh.png)
 
 ### 作业管理
-![RUN](img/job.png)
-![RUN](img/job2.png)
-![RUN](img/send_file.png)
+!(img/job.png)
+!(img/job2.png)
+!(img/send_file.png)
 
 
 ### Kubernetes管理
